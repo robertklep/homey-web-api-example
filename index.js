@@ -1,35 +1,29 @@
-const { AthomCloudAPI, HomeyAPI } = require('athom-api');
-const { join }                    = require('path');
-const settings                    = require(join(process.env.HOME, '.athom-cli', 'settings.json'));
+const { AthomApi } = require('athom-cli');
 
-// Lifted from `athom-cli`
-const CLIENT_ID     = '598d85a330e1bb0c0d75b8eb';
-const CLIENT_SECRET = 'ba93fc861b204732607169fb29c2708f1da7e17f';
-
-// XXX: CHANGE THIS TO THE ID OF A FLOW YOU WANT TO TEST
-const FLOW_ID       = '....';
-
-let athomCloudApi = new AthomCloudAPI({
-  token        : settings.athomToken,
-  clientId     : CLIENT_ID,
-  clientSecret : CLIENT_SECRET,
-});
+const FLOW_ID = '...';
 
 void async function() {
-  const user     = await athomCloudApi.getAuthenticatedUser();
-  const homeys   = await user.getHomeys();
-  const homey    = homeys[0];
-  const homeyApi = await homey.authenticate();
+  // Initialize API.
+  await AthomApi._initApi();
+
+  // Get active Homey.
+  const homey = await AthomApi.getActiveHomey();
 
   // Example: list all devices.
-  const devices = await homeyApi.devices.getDevices();
+  let devices = {};
+  try {
+    devices = await homey.devices.getDevices();
+  } catch(e) {
+    console.log(e);
+    process.exit(1);
+  }
   for (const id of Object.keys(devices)) {
     console.log(`Device ${ id }: ${ devices[id].name }`);
   }
 
   // Example: trigger a flow.
-  const flow   = await homeyApi.flow.getFlow({ id : FLOW_ID });
-  await homeyApi.flow.testFlow({ flow, tokens : [] });
+  const flow = await homey.flow.getFlow({ id : FLOW_ID });
+  await homey.flow.testFlow({ flow, tokens : [] });
 
   // Done.
   process.exit(0);

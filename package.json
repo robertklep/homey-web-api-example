@@ -9,6 +9,6 @@
   "author": "Robert Klep <robert@klep.name>",
   "license": "MIT",
   "dependencies": {
-    "athom-api": "^2.0.115"
+    "athom-cli": "^2.1.56"
   }
 }
